@@ -1,89 +1,127 @@
 {% extends 'base.html' %}
 
 {% block sidebar %}
-<div class="col-md-3">
-    <div class="card  text-center ">
-        <div class="card-header bg-info">
-            Product Category
+<div class="col-lg-3 mb-4">
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4">
+            <i class="bi bi-funnel-fill me-2"></i>
+            Filter Products
         </div>
+
         <div class="card-body">
-            <form>
-                <div class="form-group">
-                    <label for="inputAddress">Product Name</label>
-                    <input type="text" class="form-control" id="inputAddress" placeholder="Search Product">
+            <form method="get">
+
+                <div class="mb-3">
+                    <label class="form-label">Product Name</label>
+                    <input type="text"
+                           class="form-control"
+                           name="q"
+                           placeholder="Search product"
+                           value="{{ query }}">
                 </div>
-                <div class="form-group">
-                    <label for="inputAddress2">Product Category</label>
-                    <select class="form-control ">
-                        <option>Select Product</option>
+
+                <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select">
+
+                        <option value="" {% if not request.GET.category %}selected{% endif %}>
+                            All Categories
+                        </option>
+
+                        <option value="Beverage" {% if request.GET.category == "Beverage" %}selected{% endif %}>
+                            Beverage
+                        </option>
+
+                        <option value="Sports" {% if request.GET.category == "Sports" %}selected{% endif %}>
+                            Sports
+                        </option>
+
+                        <option value="Education" {% if request.GET.category == "Education" %}selected{% endif %}>
+                            Education
+                        </option>
+
                     </select>
                 </div>
-                <button type="submit" class="btn btn-outline-info">Filter</button>
+
+                <button class="btn btn-primary w-100 rounded-3">
+                    <i class="bi bi-search me-1"></i>
+                    Filter
+                </button>
+
             </form>
         </div>
     </div>
+
 </div>
 {% endblock %}
 
 
-
 {% block main %}
-<div class="col-md-9">
-    <div class="row mt-2 pb-3">
+<div class="col-lg-9">
+
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show">
+        {{ message }}
+        <button class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+
+    <div class="row g-3">
+
         {% for product in products %}
-        <div class="col-md-3">
-        
-            <div class="card-deck">
-                <div class="card p-2 border-secondary mb-2">
+        <div class="col-6 col-md-4 col-lg-3">
 
-                    <img {% if product.image %} src="{{product.image.url}}" {% endif %} alt="img " height="135">
-                    <div class="card-body p-1">
-                        <h4 class="card-title text-center text-info">{{product.name}}</h4>
-                        <h5 class="card-text text-center text-danger">
-                            <i class="fa fa-inr" aria-hidden="true"></i>{{product.price}}</h5>
+            <div class="card h-100 border-0 shadow-sm rounded-4 product-card">
 
-
-                    </div>
-                    <div class="card-footer">
-                        <a type="button" class="btn btn-link text-primary" data-toggle="modal"
-                            data-target="#exampleModal">
-                            View More
-                        </a>
-                       <form action="{% url 'add' product.id %}" method="post" style="margin-left: -24px; margin-right: -24px;">
-                                {% csrf_token %}
-                                <input type="number" name="quantity" placeholder="1" style="width: 68px;"/>
-                                <button class="btn btn-primary btn-sm" type="submit">
-                                <i class="fa fa-plus" aria-hidden="true"></i>
-                                Add to cart
-                                </button>
-                        </form>
-
-                    </div>
+                {% if product.image %}
+                <img src="{{ product.image.url }}"
+                     class="card-img-top rounded-top-4"
+                     style="height:150px; object-fit:cover;">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center"
+                     style="height:150px;">
+                    <i class="bi bi-image text-secondary fs-3"></i>
                 </div>
-            </div>
-            <!-- Modal -->
-            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Product Details</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            {{product.description}}
-                        </div>
+                {% endif %}
 
-                    </div>
+                <div class="card-body text-center py-2">
+                    <h6 class="mb-1 text-truncate">{{ product.name }}</h6>
+                    <small class="text-success fw-bold">
+                        NPR {{ product.price }}
+                    </small>
                 </div>
+
+                <div class="card-footer bg-white border-0 pb-3">
+
+                    <a href="#"
+                       class="btn btn-outline-primary btn-sm w-100 mb-2 rounded-3">
+                        <i class="bi bi-eye me-1"></i>
+                        View Details
+                    </a>
+
+                    <form action="{% url 'add' product.id %}" method="post">
+                        {% csrf_token %}
+                        <button class="btn btn-success btn-sm w-100 rounded-3">
+                            <i class="bi bi-cart-plus me-1"></i>
+                            Add To Cart
+                        </button>
+                    </form>
+
+                </div>
+
             </div>
-         
+
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center">
+                No products available.
+            </div>
         </div>
         {% endfor %}
+
     </div>
-</div>
 </div>
 
 {% endblock %}

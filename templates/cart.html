@@ -12,10 +12,11 @@
         <thead>
             <tr>
                 <th>Product</th>
+                <th>Category</th>
                 <th>Price</th>
                 <th>Quantity</th>
                 <th>Subtotal</th>
-                <th></th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -25,15 +26,16 @@
                     <img src="{{ item.product.image.url }}" width="50" height="50" class="me-2">
                     {{ item.product.name }}
                 </td>
+                <td>{{item.product.category}}</td>
                 <td>Rs. {{ item.product.price }}</td>
                 <td>
-                    <a href="#" class="btn btn-sm btn-outline-secondary">-</a>
+                    <a href="{% url 'decrease' item.product.id %}" class="btn btn-sm btn-outline-secondary">-</a>
                     {{ item.qty }}
-                    <a href="#" class="btn btn-sm btn-outline-secondary">+</a>
+                    <a href="{% url 'increase' item.product.id %}" class="btn btn-sm btn-outline-secondary">+</a>
                 </td>
                 <td>Rs. {{ item.subtotal }}</td>
                 <td>
-                    <a href="#" class="btn btn-sm btn-danger">Remove</a>
+                    <a href="{% url 'remove' item.product.id %}" class="btn btn-sm btn-danger">Remove</a>
                 </td>
             </tr>
             {% endfor %}
