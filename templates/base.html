@@ -11,11 +11,12 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    
         {% load static %}
         {% block css %}
         <style href="{% static 'shop/style.css' %}"></style>
         {% endblock  %}
-    <title>ecommerce</title>
+    <title>Hamro-Eshop</title>
 </head>
 
 <body>
@@ -23,7 +24,7 @@
     {% block navbar %}
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">Simple Ecommerce</a>
+            <a class="navbar-brand" href="/">Hamro-Eshop</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
                 aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -47,9 +48,9 @@
                 </ul>
 
           
-                    <a class="btn btn-success btn-sm ml-3" href="#">
+                    <a class="btn btn-success btn-sm ml-3" href="{% url 'cart' %}">
                         <i class="fa fa-shopping-cart"></i> 
-                        <span class="badge badge-light">3</span>
+                        <span class="badge badge-light">{{cart_count}}</span>
                     </a>
          
 
