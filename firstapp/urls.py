@@ -1,13 +1,31 @@
+
 from django.urls import path
-from .views import CheckOutForm,view_order
 from django.contrib.auth import views as auth_views
-from django.urls import path
 from . import views
+from .views import CheckOutForm, order_history
 
 urlpatterns = [
-    path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path(
+        "login/",
+        auth_views.LoginView.as_view(template_name="login.html"),
+        name="login",
+    ),
+
+    path(
+        "logout/",
+        auth_views.LogoutView.as_view(),
+        name="logout",
+    ),
+
     path("register/", views.register, name="register"),
-    path('checkout/',CheckOutForm,name="checkout"),
-    path('order-history/',view_order,name="order-history"),
+
+    path("checkout/", CheckOutForm, name="checkout"),
+
+    path("order-history/", order_history, name="order-history"),
+
+    path(
+        "orders/all-receipts/",
+        views.download_all_receipts,
+        name="download-all-receipts",
+    ),
 ]

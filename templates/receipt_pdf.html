@@ -1,0 +1,246 @@
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<style>
+    @page {
+        size: A4;
+        margin: 1.5cm;
+    }
+
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 12px;
+        color: #222;
+    }
+
+    h1 {
+        font-size: 22px;
+        margin: 0;
+    }
+
+    .muted { color: #666; }
+    .right { text-align: right; }
+    .center { text-align: center; }
+
+    .title {
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        text-align: center;
+        border-top: 2px solid #222;
+        border-bottom: 2px solid #222;
+        padding: 6px 0;
+        margin: 14px 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .info td {
+        padding: 3px 0;
+        vertical-align: top;
+    }
+
+    .items {
+        margin-top: 14px;
+    }
+
+    .items th {
+        background: #eeeeee;
+        border: 1px solid #444;
+        padding: 6px;
+        font-size: 11px;
+    }
+
+    .items td {
+        border: 1px solid #444;
+        padding: 6px;
+    }
+
+    .totals {
+        margin-top: 10px;
+    }
+
+    .totals td {
+        padding: 4px 6px;
+    }
+
+    .grand {
+        border-top: 2px solid #222;
+        border-bottom: 2px solid #222;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .status {
+        border: 2px solid #444;
+        color: #222;
+        font-weight: bold;
+        font-size: 12px;
+        padding: 4px 12px;
+    }
+
+    .footer {
+        margin-top: 40px;
+        font-size: 11px;
+    }
+
+    .sign {
+        border-top: 1px solid #222;
+        width: 160px;
+        padding-top: 4px;
+        text-align: center;
+    }
+
+    .receipt {
+        page-break-inside: avoid;
+    }
+
+    .receipt + .receipt {
+        page-break-before: always;
+    }
+</style>
+</head>
+
+<body>
+
+{% for order in orders %}
+
+<div class="receipt">
+
+    <!-- Shop and receipt details -->
+    <table>
+        <tr>
+            <td>
+                <h1>Drinks Well & Fresh Shop</h1>
+                <div class="muted">Chitwan MalpotChowk, Nepal</div>
+            </td>
+
+            <td class="right">
+                <b>Receipt No:</b>
+                HE-{{ order.id|stringformat:"05d" }}
+
+                <br>
+
+                <b>Date:</b>
+                {{ order.ordered_date|date:"d M Y, H:i" }}
+            </td>
+        </tr>
+    </table>
+
+    <div class="title">ORDER RECEIPT</div>
+
+    <!-- Customer information -->
+    <table class="info">
+        <tr>
+            <td width="50%">
+                <b>Billed To</b><br>
+
+                {% if order.customer %}
+                    {{ order.customer.name }}<br>
+
+                    {% if order.customer.email %}
+                        {{ order.customer.email }}<br>
+                    {% endif %}
+
+                    {% if order.customer.phone %}
+                        Phone: {{ order.customer.phone }}<br>
+                    {% endif %}
+
+                    {% if order.customer.address %}
+                        Address: {{ order.customer.address }}
+                    {% endif %}
+                {% else %}
+                    Customer information unavailable.
+                {% endif %}
+            </td>
+
+            <td width="50%" class="right">
+                <b>Order Status</b><br>
+                <span class="status">
+                    {{ order.get_status_display }}
+                </span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Ordered product -->
+    <table class="items">
+        <thead>
+            <tr>
+                <th width="8%">S.N.</th>
+                <th>Description</th>
+                <th width="12%">Qty</th>
+                <th width="20%">Unit Price (NPR)</th>
+                <th width="20%">Amount (NPR)</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td class="center">1</td>
+                <td>{{ order.product }}</td>
+                <td class="center">{{ order.quantity }}</td>
+                <td class="right">
+                    {{ order.price|floatformat:2 }}
+                </td>
+                <td class="right">
+                    {{ order.price|floatformat:2 }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Total calculation -->
+    <table class="totals">
+        <tr>
+            <td width="60%"></td>
+            <td width="20%" class="right">Subtotal</td>
+            <td width="20%" class="right">
+                {{ order.price|floatformat:2 }}
+            </td>
+        </tr>
+
+        <tr class="grand">
+            <td></td>
+            <td class="right">Total (NPR)</td>
+            <td class="right">
+                {{ order.price|floatformat:2 }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <table class="footer">
+        <tr>
+            <td>
+                Thank you for shopping with Hamro-Eshop.<br>
+                <span class="muted">
+                    This is a computer-generated order receipt.
+                </span>
+            </td>
+
+            <td class="right">
+                <br><br>
+                <div class="sign" style="margin-left:auto;">
+                    Authorized Signature
+                </div>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+{% empty %}
+
+    <h2>No orders found.</h2>
+
+{% endfor %}
+
+</body>
+</html>

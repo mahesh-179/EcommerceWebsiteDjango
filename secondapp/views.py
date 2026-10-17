@@ -93,3 +93,4 @@ def decrease(request,product_id):
         
     request.session['cart']=cart
     return redirect('cart')
+
