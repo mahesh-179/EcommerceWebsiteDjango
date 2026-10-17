@@ -4,6 +4,10 @@ from .models import Product
 from .models import CustomerOrder
 from django.contrib import messages
 from django.db.models import Sum, F
+from django.contrib.auth import login
+from django.shortcuts import render, redirect
+from .forms import RegisterForm
+
 # Create your views here.
 def CheckOutForm(request):
     if request.method == 'POST':
@@ -47,3 +51,18 @@ def view_order(request):
         "total":total,
     }
     return render(request,"firstapp/orderhistory.html",context = context )
+
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect("/")
+
+    form = RegisterForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        login(request, user)
+        return redirect("/")
+
+    return render(request, "register.html", {"form": form})
