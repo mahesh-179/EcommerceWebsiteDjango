@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block main %}
+<div class="col-lg-9">
+
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-dark text-white">
+            My Order History
+        </div>
+
+        <div class="card-body">
+
+            {% if orders %}
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Quanity</th>
+                            <th>Date</th>
+                            <th>Product Name</th>
+                            <th>Price Per Unit</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td class="fw-bold">{{ order.id }}</td>
+                             <td >{{ order.quantity}}</td>
+                            <td>
+                                {{ order.ordered_date|date:"Y-m-d H:i" }}
+                            </td>
+                            <td>
+                                {{ order.product }}
+                            </td>
+
+
+                            <td class="text-success fw-bold">
+                                NPR {{ order.price }}
+                            </td>
+
+                            <td>
+                                {% if order.is_status %}
+                                    <span class="badge bg-success">Paid</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+               <div class="p-3 rounded-4 shadow-sm border bg-light mt-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <span class="fw-semibold text-secondary">Total Amount</span>
+        <span class="fs-4 fw-bold text-success">
+            NPR {{ total.total }}
+        </span>
+    </div>
+</div>
+
+            </div>
+            {% else %}
+                <div class="alert alert-warning text-center">
+                    No orders found.
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

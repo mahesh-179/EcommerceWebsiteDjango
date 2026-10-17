@@ -1,55 +1,57 @@
 {% extends 'base.html' %}
 
 {% block sidebar %}
-<div class="col-lg-3 mb-4">
+<div class="col-lg-3 mb-3">
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-header bg-primary text-white rounded-top-4">
-            <i class="bi bi-funnel-fill me-2"></i>
-            Filter Products
-        </div>
+    <!-- Mobile: filter toggle -->
+    <button class="btn btn-primary w-100 d-lg-none mb-2" type="button"
+            data-bs-toggle="collapse" data-bs-target="#filterBox"
+            aria-expanded="false" aria-controls="filterBox">
+        <i class="bi bi-funnel-fill me-2"></i>Filter Products
+    </button>
 
-        <div class="card-body">
-            <form method="get">
+    <div class="collapse d-lg-block" id="filterBox">
+        <div class="card border-0 shadow-sm rounded-4">
 
-                <div class="mb-3">
-                    <label class="form-label">Product Name</label>
-                    <input type="text"
-                           class="form-control"
-                           name="q"
-                           placeholder="Search product"
-                           value="{{ query }}">
-                </div>
+            <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+                <span class="fw-semibold">
+                    <i class="bi bi-funnel-fill text-primary me-2"></i>Filter Products
+                </span>
+                {% if request.GET.q or request.GET.category %}
+                <a href="?" class="small text-decoration-none">
+                    <i class="bi bi-x-circle me-1"></i>Clear
+                </a>
+                {% endif %}
+            </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Category</label>
-                    <select name="category" class="form-select">
+            <div class="card-body">
+                <form method="get">
 
-                        <option value="" {% if not request.GET.category %}selected{% endif %}>
-                            All Categories
-                        </option>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Product Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" name="q"
+                                   placeholder="Search product" value="{{ query }}">
+                        </div>
+                    </div>
 
-                        <option value="Beverage" {% if request.GET.category == "Beverage" %}selected{% endif %}>
-                            Beverage
-                        </option>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Category</label>
+                        <select name="category" class="form-select">
+                            <option value="" {% if not request.GET.category %}selected{% endif %}>All Categories</option>
+                            <option value="Beverage" {% if request.GET.category == "Beverage" %}selected{% endif %}>Beverage</option>
+                            <option value="Sports" {% if request.GET.category == "Sports" %}selected{% endif %}>Sports</option>
+                            <option value="Education" {% if request.GET.category == "Education" %}selected{% endif %}>Education</option>
+                        </select>
+                    </div>
 
-                        <option value="Sports" {% if request.GET.category == "Sports" %}selected{% endif %}>
-                            Sports
-                        </option>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>Filter
+                    </button>
 
-                        <option value="Education" {% if request.GET.category == "Education" %}selected{% endif %}>
-                            Education
-                        </option>
-
-                    </select>
-                </div>
-
-                <button class="btn btn-primary w-100 rounded-3">
-                    <i class="bi bi-search me-1"></i>
-                    Filter
-                </button>
-
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -60,54 +62,76 @@
 {% block main %}
 <div class="col-lg-9">
 
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-grid-3x3-gap text-primary me-2"></i>Products
+            <span class="text-muted fs-6">({{ products|length }})</span>
+        </h5>
+    </div>
+
     {% for message in messages %}
-    <div class="alert alert-success alert-dismissible fade show">
-        {{ message }}
-        <button class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %}
+
+    {% if query or request.GET.category %}
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        {% if query %}
+        <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+            <i class="bi bi-search me-1"></i>{{ query }}
+        </span>
+        {% endif %}
+        {% if request.GET.category %}
+        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2">
+            <i class="bi bi-tag me-1"></i>{{ request.GET.category }}
+        </span>
+        {% endif %}
+    </div>
+    {% endif %}
 
     <div class="row g-3">
 
         {% for product in products %}
-        <div class="col-6 col-md-4 col-lg-3">
+        <div class="col-6 col-md-4 col-xl-3">
 
-            <div class="card h-100 border-0 shadow-sm rounded-4 product-card">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
 
-                {% if product.image %}
-                <img src="{{ product.image.url }}"
-                     class="card-img-top rounded-top-4"
-                     style="height:150px; object-fit:cover;">
-                {% else %}
-                <div class="bg-light d-flex align-items-center justify-content-center"
-                     style="height:150px;">
-                    <i class="bi bi-image text-secondary fs-3"></i>
+                <div class="position-relative">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                         class="card-img-top" style="height:150px; object-fit:cover;">
+                    {% else %}
+                    <div class="bg-light d-flex align-items-center justify-content-center"
+                         style="height:150px;">
+                        <i class="bi bi-image text-secondary fs-3"></i>
+                    </div>
+                    {% endif %}
+
+                    {% if product.category %}
+                    <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-2">
+                        {{ product.category }}
+                    </span>
+                    {% endif %}
                 </div>
-                {% endif %}
 
                 <div class="card-body text-center py-2">
-                    <h6 class="mb-1 text-truncate">{{ product.name }}</h6>
-                    <small class="text-success fw-bold">
-                        NPR {{ product.price }}
-                    </small>
+                    <h6 class="mb-1 text-truncate" title="{{ product.name }}">{{ product.name }}</h6>
+                    <span class="text-success fw-bold">NPR {{ product.price }}</span>
                 </div>
 
-                <div class="card-footer bg-white border-0 pb-3">
-
-                    <a href="#"
-                       class="btn btn-outline-primary btn-sm w-100 mb-2 rounded-3">
-                        <i class="bi bi-eye me-1"></i>
-                        View Details
+                <div class="card-footer bg-white border-0 pb-3 pt-0">
+                    <a href="#" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                        <i class="bi bi-eye me-1"></i>View Details
                     </a>
 
                     <form action="{% url 'add' product.id %}" method="post">
                         {% csrf_token %}
-                        <button class="btn btn-success btn-sm w-100 rounded-3">
-                            <i class="bi bi-cart-plus me-1"></i>
-                            Add To Cart
+                        <button type="submit" class="btn btn-success btn-sm w-100">
+                            <i class="bi bi-cart-plus me-1"></i>Add To Cart
                         </button>
                     </form>
-
                 </div>
 
             </div>
@@ -115,13 +139,14 @@
         </div>
         {% empty %}
         <div class="col-12">
-            <div class="alert alert-warning text-center">
-                No products available.
+            <div class="text-center py-5">
+                <i class="bi bi-emoji-frown fs-1 text-secondary"></i>
+                <p class="mt-2 text-muted">No products available.</p>
+                <a href="?" class="btn btn-outline-primary btn-sm">Reset filters</a>
             </div>
         </div>
         {% endfor %}
 
     </div>
 </div>
-
 {% endblock %}
