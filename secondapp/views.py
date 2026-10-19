@@ -6,6 +6,48 @@ from django.shortcuts import redirect, render
 from .models import Product
 
 PRODUCTS_PER_PAGE = 4
+#siganls
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+
+from .models import Profile
+
+
+@login_required
+def my_details(request):
+    profile, created = Profile.objects.get_or_create(
+        user=request.user
+    )
+
+    if request.method == "POST":
+        user = request.user
+
+        # Update user information
+        user.first_name = request.POST.get("first_name", "").strip()
+        user.last_name = request.POST.get("last_name", "").strip()
+
+        # Keep email editable if desired
+        user.email = request.POST.get("email", "").strip()
+        user.save()
+
+        # Update profile information
+        profile.phone = request.POST.get("phone", "").strip()
+        profile.address = request.POST.get("address", "").strip()
+        profile.bio = request.POST.get("bio", "").strip()
+
+        if request.FILES.get("profile_picture"):
+            profile.profile_picture = request.FILES["profile_picture"]
+
+        profile.save()
+
+        messages.success(request, "Your profile was updated successfully.")
+        return redirect("my_details")
+
+    return render(request, "my_details.html", {
+        "profile": profile,
+    })
 
 
 def index(request):
