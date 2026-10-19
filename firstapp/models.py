@@ -2,6 +2,7 @@ from django.db import models
 from django.db import models
 from secondapp.models import Product 
 from django.conf import settings
+
 class Customer(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
