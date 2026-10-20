@@ -2,6 +2,35 @@
 
 {% block title %}Products{% endblock %}
 
+{% block css %}
+<style>
+    .product-img {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        flex-shrink: 0;            /* stops the box shrinking inside the flex card */
+        overflow: hidden;
+        background: var(--muted);
+    }
+    .product-img img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;         /* fills the box, crops the edges. Use "contain" to show the whole image */
+        object-position: center;
+        display: block;
+    }
+    .product-img .no-img {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
 {% block sidebar %}
 <div class="col-lg-3">
 
@@ -38,8 +67,10 @@
                         <select name="category" class="ui-input">
                             <option value="" data-i18n="all_categories" {% if not request.GET.category %}selected{% endif %}>All categories</option>
                             <option value="Beverage" data-i18n="beverage" {% if request.GET.category == "Beverage" %}selected{% endif %}>Beverage</option>
-                            <option value="Sports" data-i18n="sports" {% if request.GET.category == "Sports" %}selected{% endif %}>Sports</option>
-                            <option value="Education" data-i18n="education" {% if request.GET.category == "Education" %}selected{% endif %}>Education</option>
+                            <option value="Imported fruits" {% if request.GET.category == "Imported fruits" %}selected{% endif %}>Imported fruits</option>
+                            <option value="Cut and ready-to-eat fruit" {% if request.GET.category == "Cut and ready-to-eat fruit" %}selected{% endif %}>Cut and ready-to-eat fruit</option>
+                            <option value="Packaged beverages" {% if request.GET.category == "Packaged beverages" %}selected{% endif %}>Packaged beverages</option>
+                            <option value="Smoothies and shakes" {% if request.GET.category == "Smoothies and shakes" %}selected{% endif %}>Smoothies and shakes</option>
                         </select>
                     </div>
 
@@ -88,12 +119,11 @@
         <div class="col-6 col-md-4 col-xl-3">
             <div class="ui-card h-100 overflow-hidden d-flex flex-column">
 
-                <div class="position-relative" style="aspect-ratio: 4/3; background: var(--muted);">
+                <div class="product-img">
                     {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
-                         class="w-100 h-100" style="object-fit:cover;" loading="lazy">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
                     {% else %}
-                    <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                    <div class="no-img">
                         <i class="bi bi-image text-secondary fs-3"></i>
                     </div>
                     {% endif %}
@@ -108,8 +138,8 @@
                 </div>
 
                 <div class="p-3 pt-1 mt-auto d-grid gap-2">
-                    <a href="{% url 'product_detail' product.id %}" class="ui-btn ui-btn-outline ui-btn-sm">
-                        <i class="bi bi-eye"></i><span data-i18n="product_detail">View details</span>
+                    <a href="{% url 'product_detail' product.id %}" class="ui-btn ui-btn-outline ui-btn-sm js-view-details">
+                        <i class="bi bi-eye"></i><span data-i18n="view_details">View details</span>
                     </a>
                     <form action="{% url 'add' product.id %}" method="post">
                         {% csrf_token %}
@@ -170,4 +200,46 @@
     {% endif %}
 
 </div>
+{% endblock %}
+
+{% block js %}
+<!-- ============ PRODUCT DETAILS POPUP ============ -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title fw-semibold">Product details</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="productModalBody"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var modalEl = document.getElementById("productModal");
+    var body = document.getElementById("productModalBody");
+    var modal = new bootstrap.Modal(modalEl);
+
+    var LOADING = '<div class="text-center py-5"><div class="spinner-border" role="status"></div></div>';
+    var ERROR = '<div class="text-center py-5 text-muted"><i class="bi bi-exclamation-circle fs-1"></i>' +
+                '<p class="mt-2 mb-0">Could not load product. Please try again.</p></div>';
+
+    document.querySelectorAll(".js-view-details").forEach(function (link) {
+        link.addEventListener("click", function (e) {
+            e.preventDefault();                 // without JS the link opens the full detail page
+            body.innerHTML = LOADING;
+            modal.show();
+
+            fetch(link.href, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+                .then(function (html) { body.innerHTML = html; })
+                .catch(function () { body.innerHTML = ERROR; });
+        });
+    });
+
+    modalEl.addEventListener("hidden.bs.modal", function () { body.innerHTML = ""; });
+})();
+</script>
 {% endblock %}
