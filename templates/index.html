@@ -108,7 +108,7 @@
                 </div>
 
                 <div class="p-3 pt-1 mt-auto d-grid gap-2">
-                    <a href="#" class="ui-btn ui-btn-outline ui-btn-sm">
+                    <a href="{% url 'product_detail' %}" class="ui-btn ui-btn-outline ui-btn-sm">
                         <i class="bi bi-eye"></i><span data-i18n="product_detail">View details</span>
                     </a>
                     <form action="{% url 'add' product.id %}" method="post">
