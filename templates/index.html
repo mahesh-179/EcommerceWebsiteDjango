@@ -1,645 +1,173 @@
-<!doctype html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}Products{% endblock %}
 
-    <!-- Apply saved/system theme before paint (prevents white flash) -->
-    <script>
-    (function () {
-        var t;
-        try { t = localStorage.getItem("shop_theme"); } catch (e) {}
-        if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-        document.documentElement.setAttribute("data-bs-theme", t);
-    })();
-    </script>
+{% block sidebar %}
+<div class="col-lg-3">
 
-    <title>{% block title %}Drinks Well & Fruit Shops{% endblock %}</title>
+    <!-- Mobile filter toggle -->
+    <button class="ui-btn ui-btn-outline w-100 d-lg-none mb-2" type="button"
+            data-bs-toggle="collapse" data-bs-target="#filterBox"
+            aria-expanded="false" aria-controls="filterBox">
+        <i class="bi bi-sliders"></i><span data-i18n="filter_products">Filter Products</span>
+    </button>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <div class="collapse d-lg-block" id="filterBox">
+        <div class="ui-card" style="position:sticky; top:76px;">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --background: #ffffff;
-            --foreground: #09090b;
-            --muted: #f4f4f5;
-            --muted-foreground: #71717a;
-            --border: #e4e4e7;
-            --primary: #18181b;
-            --primary-foreground: #fafafa;
-            --accent: #f4f4f5;
-            --ring: #a1a1aa;
-            --radius: .625rem;
-
-            --bs-primary: #18181b;
-            --bs-primary-rgb: 24, 24, 27;
-            --bs-link-color: #18181b;
-            --bs-link-hover-color: #000;
-            --bs-body-font-family: 'Inter', 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background: var(--muted);
-            color: var(--foreground);
-            font-size: .925rem;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            -webkit-font-smoothing: antialiased;
-        }
-        main.page-content { flex: 1 0 auto; }
-        body.lang-ne { font-family: 'Noto Sans Devanagari', 'Inter', sans-serif; }
-
-        /* ---------- Navbar ---------- */
-        .shop-navbar {
-            background: rgba(255,255,255,.85);
-            backdrop-filter: saturate(180%) blur(10px);
-            border-bottom: 1px solid var(--border);
-        }
-        .shop-navbar .navbar-brand {
-            font-weight: 700; letter-spacing: -.02em; color: var(--foreground);
-            display: flex; align-items: center; gap: .5rem; font-size: 1.02rem;
-        }
-        .brand-mark {
-            width: 30px; height: 30px; border-radius: 8px; background: var(--primary);
-            color: var(--primary-foreground); display: inline-grid; place-items: center; font-size: .95rem;
-        }
-        .shop-navbar .nav-link {
-            color: var(--muted-foreground); font-weight: 500; padding: .4rem .75rem !important;
-            border-radius: calc(var(--radius) - 2px); transition: background .15s, color .15s;
-            background: none; border: 0;
-        }
-        .shop-navbar .nav-link:hover,
-        .shop-navbar .nav-link.active { color: var(--foreground); background: var(--accent); }
-        .shop-navbar .navbar-toggler { border: 1px solid var(--border); padding: .3rem .5rem; }
-        .shop-navbar .navbar-toggler:focus { box-shadow: 0 0 0 2px var(--ring); }
-
-        .nav-icon-btn {
-            position: relative; display: inline-flex; align-items: center; justify-content: center;
-            width: 38px; height: 38px; border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px);
-            background: var(--background); color: var(--foreground); text-decoration: none; font-size: 1.05rem;
-            transition: background .15s;
-        }
-        .nav-icon-btn:hover, .nav-icon-btn:focus, .nav-icon-btn.show { background: var(--accent); color: var(--foreground); }
-        .cart-badge {
-            position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px;
-            border-radius: 9px; background: var(--primary); color: var(--primary-foreground);
-            font-size: .68rem; font-weight: 600; line-height: 18px; text-align: center;
-            border: 2px solid var(--background); box-sizing: content-box;
-        }
-        .lang-btn {
-            height: 38px; padding: 0 .85rem; border: 1px solid var(--border);
-            border-radius: calc(var(--radius) - 2px); background: var(--background);
-            color: var(--foreground); font-size: .82rem; font-weight: 600; transition: background .15s;
-        }
-        .lang-btn:hover { background: var(--accent); }
-
-        .account-menu {
-            min-width: 220px; border: 1px solid var(--border); border-radius: var(--radius);
-            box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: .35rem; margin-top: .5rem !important;
-        }
-        .account-menu .dropdown-item { border-radius: calc(var(--radius) - 3px); padding: .5rem .65rem; font-size: .875rem; }
-        .account-menu .dropdown-item:hover { background: var(--accent); }
-        .account-menu .dropdown-item i { width: 1.25rem; display: inline-block; }
-        .account-menu .dropdown-header { font-size: .8rem; color: var(--muted-foreground); }
-        .account-menu .dropdown-divider { border-color: var(--border); }
-
-        /* ---------- Shared UI kit (used by index.html) ---------- */
-        .ui-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-            font-weight: 500; font-size: .85rem; line-height: 1.25; padding: .5rem .9rem;
-            border-radius: calc(var(--radius) - 2px); border: 1px solid var(--primary);
-            background: var(--primary); color: var(--primary-foreground);
-            text-decoration: none; cursor: pointer; transition: opacity .15s, background .15s;
-        }
-        .ui-btn:hover { opacity: .88; color: var(--primary-foreground); }
-        .ui-btn:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
-        .ui-btn-outline { background: var(--background); color: var(--foreground); border-color: var(--border); }
-        .ui-btn-outline:hover { background: var(--accent); color: var(--foreground); opacity: 1; }
-        .ui-btn-sm { padding: .35rem .7rem; font-size: .8rem; }
-        .ui-card {
-            background: var(--background); border: 1px solid var(--border);
-            border-radius: var(--radius); box-shadow: 0 1px 2px rgba(0,0,0,.04);
-        }
-        .ui-card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
-        .ui-card-body { padding: 1.25rem; }
-        .ui-label { font-size: .8rem; font-weight: 500; margin-bottom: .4rem; display: block; }
-        .ui-input {
-            width: 100%; padding: .5rem .75rem; font-size: .875rem; background: var(--background);
-            border: 1px solid var(--border); border-radius: calc(var(--radius) - 2px); color: var(--foreground);
-        }
-        .ui-input:focus { outline: 2px solid var(--ring); outline-offset: 1px; border-color: var(--ring); }
-        .ui-badge {
-            display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; font-weight: 500;
-            padding: .15rem .6rem; border-radius: 999px; border: 1px solid var(--border);
-            background: var(--background); color: var(--foreground);
-        }
-
-        .modal-content { border: 1px solid var(--border); border-radius: calc(var(--radius) + 4px); }
-        .modal-header, .modal-footer { border-color: var(--border); }
-
-        .shop-footer { background: var(--background); border-top: 1px solid var(--border); color: var(--muted-foreground); }
-        .footer-brand { display: inline-flex; align-items: center; gap: .5rem; font-weight: 700; letter-spacing: -.02em; color: var(--foreground); text-decoration: none; }
-        .footer-title { font-weight: 600; color: var(--foreground); margin-bottom: .75rem; font-size: .875rem; }
-        .footer-text { color: var(--muted-foreground); }
-        .footer-link { color: var(--muted-foreground); text-decoration: none; background: none; border: 0; padding: 0; font: inherit; transition: color .15s; }
-        .footer-link:hover { color: var(--foreground); }
-        .footer-bottom { border-top: 1px solid var(--border); }
-    </style>
-
-    <style>
-        /* ---------- Dark mode ---------- */
-        [data-bs-theme="dark"] {
-            --background: #09090b;
-            --foreground: #fafafa;
-            --muted: #18181b;
-            --muted-foreground: #a1a1aa;
-            --border: #27272a;
-            --primary: #fafafa;
-            --primary-foreground: #18181b;
-            --accent: #27272a;
-            --ring: #71717a;
-
-            --bs-primary: #fafafa;
-            --bs-primary-rgb: 250, 250, 250;
-            --bs-link-color: #fafafa;
-            --bs-link-hover-color: #fff;
-            --bs-body-bg: #18181b;
-            --bs-body-color: #fafafa;
-            --bs-border-color: #27272a;
-            color-scheme: dark;
-        }
-        [data-bs-theme="dark"] .shop-navbar { background: rgba(9,9,11,.85); }
-        [data-bs-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
-        [data-bs-theme="dark"] .account-menu {
-            --bs-dropdown-bg: var(--background);
-            --bs-dropdown-color: var(--foreground);
-            box-shadow: 0 8px 24px rgba(0,0,0,.5);
-        }
-        [data-bs-theme="dark"] .account-menu .dropdown-item { color: var(--foreground); }
-        [data-bs-theme="dark"] .account-menu .dropdown-item.text-danger { color: #f87171; }
-        [data-bs-theme="dark"] .modal-content { background: var(--background); color: var(--foreground); }
-        [data-bs-theme="dark"] .ui-input::placeholder { color: var(--muted-foreground); }
-
-        /* Theme toggle icons */
-        .theme-toggle .icon-sun { display: none; }
-        [data-bs-theme="dark"] .theme-toggle .icon-sun { display: inline; }
-        [data-bs-theme="dark"] .theme-toggle .icon-moon { display: none; }
-
-        /* Smooth switch */
-        body, .shop-navbar, .shop-footer, .ui-card, .modal-content, .account-menu {
-            transition: background-color .2s, color .2s, border-color .2s;
-        }
-
-        /* ---------- Small phones: keep the navbar on one row ---------- */
-        @media (max-width: 575.98px) {
-            .shop-navbar .navbar-brand { flex: 1 1 0; min-width: 0; margin-right: .5rem; font-size: .85rem; line-height: 1.15; }
-            .shop-navbar .container > .d-flex { flex: 0 0 auto; gap: .4rem !important; }
-            .nav-icon-btn { width: 34px; height: 34px; font-size: 1rem; }
-            .lang-btn { height: 34px; padding: 0 .6rem; font-size: .78rem; }
-        }
-    </style>
-
-    <style>
-        /* ---------- Show / hide password ---------- */
-        .pw-wrap { position: relative; display: block; width: 100%; }
-        .pw-wrap > input { padding-right: 2.6rem !important; }
-        .pw-toggle {
-            position: absolute; top: 50%; right: .4rem; transform: translateY(-50%);
-            width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
-            border: 0; background: none; color: var(--muted-foreground);
-            border-radius: calc(var(--radius) - 3px); cursor: pointer; font-size: 1rem;
-        }
-        .pw-toggle:hover { color: var(--foreground); background: var(--accent); }
-        .pw-toggle:focus-visible { outline: 2px solid var(--ring); }
-    </style>
-
-    {% block css %}{% endblock %}
-</head>
-
-<body>
-
-    {% url 'login' as login_url %}
-    {% url 'register' as register_url %}
-    {% url 'logout' as logout_url %}
-
-    {% block navbar %}
-    <nav class="navbar navbar-expand-md shop-navbar sticky-top">
-        <div class="container">
-
-            <a class="navbar-brand" href="/">
-                <span class="brand-mark"><i class="bi bi-bag-heart-fill"></i></span>Drinks Well & Fruit Shops
-            </a>
-
-            <!-- Always visible (also on mobile) -->
-            <div class="d-flex align-items-center gap-2 ms-auto order-md-last">
-
-                <button type="button" class="nav-icon-btn theme-toggle" id="themeBtn" aria-label="Toggle dark mode">
-                    <i class="bi bi-moon-stars icon-moon"></i>
-                    <i class="bi bi-sun icon-sun"></i>
-                </button>
-
-                <button type="button" class="lang-btn" id="langBtn" aria-label="Change language">नेपाली</button>
-
-                {% if user.is_authenticated and user.is_staff %}
-                <a class="nav-icon-btn d-none d-md-inline-flex" href="{% url 'admin:index' %}" aria-label="Admin panel" title="Admin panel">
-                    <i class="bi bi-shield-lock"></i>
+            <div class="ui-card-header d-flex justify-content-between align-items-center">
+                <span class="fw-semibold"><i class="bi bi-sliders me-2"></i><span data-i18n="filter_products">Filter Products</span></span>
+                {% if request.GET.q or request.GET.category %}
+                <a href="?" class="small text-muted text-decoration-none">
+                    <i class="bi bi-x-circle me-1"></i><span data-i18n="clear">Clear</span>
                 </a>
                 {% endif %}
+            </div>
 
-                <a class="nav-icon-btn" href="{% url 'cart' %}" aria-label="Cart">
-                    <i class="bi bi-cart3"></i>
-                    <span class="cart-badge">{{ cart_count|default:0 }}</span>
-                </a>
+            <div class="ui-card-body">
+                <form method="get" class="d-grid gap-3">
 
-                <div class="dropdown">
-                    <button class="nav-icon-btn" type="button" data-bs-toggle="dropdown"
-                            data-bs-auto-close="true" aria-expanded="false" aria-label="Account">
-                        <i class="bi bi-person"></i>
+                    <div>
+                        <label class="ui-label" data-i18n="product_name">Product name</label>
+                        <input type="text" class="ui-input" name="q" value="{{ query }}"
+                               placeholder="Search products" data-i18n-placeholder="search_ph">
+                    </div>
+
+                    <div>
+                        <label class="ui-label" data-i18n="category">Category</label>
+                        <select name="category" class="ui-input">
+                            <option value="" data-i18n="all_categories" {% if not request.GET.category %}selected{% endif %}>All categories</option>
+                            <option value="Beverage" data-i18n="beverage" {% if request.GET.category == "Beverage" %}selected{% endif %}>Beverage</option>
+                            <option value="Sports" data-i18n="sports" {% if request.GET.category == "Sports" %}selected{% endif %}>Sports</option>
+                            <option value="Education" data-i18n="education" {% if request.GET.category == "Education" %}selected{% endif %}>Education</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="ui-btn w-100">
+                        <i class="bi bi-search"></i><span data-i18n="apply_filter">Apply filter</span>
                     </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-                    <ul class="dropdown-menu dropdown-menu-end account-menu">
-                        {% if user.is_authenticated %}
-                        <li><h6 class="dropdown-header">{{ user.username }}</h6></li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'my_details' %}">
-                                <i class="bi bi-person-lines-fill"></i>My Details
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'order-history' %}">
-                                <i class="bi bi-bag-check"></i>Your Orders
-                            </a>
-                        </li>
-                        {% if user.is_staff %}
-                        <li>
-                            <a class="dropdown-item d-md-none" href="{% url 'admin:index' %}">
-                                <i class="bi bi-shield-lock"></i>Admin Panel
-                            </a>
-                        </li>
-                        {% endif %}
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form action="{{ logout_url|default:'#' }}" method="post" class="m-0">
-                                {% csrf_token %}
-                                <button type="submit" class="dropdown-item text-danger">
-                                    <i class="bi bi-box-arrow-right"></i>Logout
-                                </button>
-                            </form>
-                        </li>
-                        {% else %}
-                        <li>
-                            <a class="dropdown-item" href="{{ login_url|default:'#' }}">
-                                <i class="bi bi-box-arrow-in-right"></i>Login
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ register_url|default:'#' }}">
-                                <i class="bi bi-person-plus"></i>Register
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="{% url 'order-history' %}">
-                                <i class="bi bi-bag-check"></i>Your Orders
-                            </a>
-                        </li>
-                        {% endif %}
-                    </ul>
+</div>
+{% endblock %}
+
+
+{% block main %}
+<div class="col-lg-9">
+
+    <div class="d-flex justify-content-between align-items-end mb-3">
+        <div>
+            <h1 class="h4 fw-bold mb-0" style="letter-spacing:-.02em;" data-i18n="products">Products</h1>
+            <div class="text-muted small mt-1">
+                <span data-i18n="showing">Showing</span>
+                {{ page_obj.start_index }}–{{ page_obj.end_index }} / {{ page_obj.paginator.count }}
+            </div>
+        </div>
+    </div>
+
+    {% for message in messages %}
+    <div class="ui-card d-flex align-items-center justify-content-between px-3 py-2 mb-3" role="alert">
+        <span><i class="bi bi-check-circle-fill me-2"></i>{{ message }}</span>
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"
+                onclick="this.closest('.ui-card').remove()"></button>
+    </div>
+    {% endfor %}
+
+    {% if query or request.GET.category %}
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        {% if query %}<span class="ui-badge"><i class="bi bi-search"></i>{{ query }}</span>{% endif %}
+        {% if request.GET.category %}<span class="ui-badge"><i class="bi bi-tag"></i>{{ request.GET.category }}</span>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="row g-3">
+        {% for product in page_obj %}
+        <div class="col-6 col-md-4 col-xl-3">
+            <div class="ui-card h-100 overflow-hidden d-flex flex-column">
+
+                <div class="position-relative" style="aspect-ratio: 4/3; background: var(--muted);">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                         class="w-100 h-100" style="object-fit:cover;" loading="lazy">
+                    {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-image text-secondary fs-3"></i>
+                    </div>
+                    {% endif %}
+                    {% if product.category %}
+                    <span class="ui-badge position-absolute top-0 start-0 m-2">{{ product.category }}</span>
+                    {% endif %}
                 </div>
 
-                <button class="navbar-toggler ms-1" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#mainNav" aria-controls="mainNav"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
+                <div class="p-3 pb-2">
+                    <h6 class="mb-1 text-truncate fw-semibold" title="{{ product.name }}">{{ product.name }}</h6>
+                    <div class="fw-bold">NPR {{ product.price }}</div>
+                </div>
 
-            <div class="collapse navbar-collapse" id="mainNav">
-                <ul class="navbar-nav me-auto mt-2 mt-md-0">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button>
-                    </li>
-                    <li class="nav-item">
-                        <button type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#aboutModal">About Developer</button>
-                    </li>
-                </ul>
+                <div class="p-3 pt-1 mt-auto d-grid gap-2">
+                    <a href="#" class="ui-btn ui-btn-outline ui-btn-sm">
+                        <i class="bi bi-eye"></i><span data-i18n="view_details">View details</span>
+                    </a>
+                    <form action="{% url 'add' product.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="ui-btn ui-btn-sm w-100">
+                            <i class="bi bi-cart-plus"></i><span data-i18n="add_to_cart">Add to cart</span>
+                        </button>
+                    </form>
+                </div>
             </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="ui-card text-center py-5 px-3">
+                <i class="bi bi-box-seam fs-1 text-secondary"></i>
+                <h6 class="mt-3 mb-1 fw-semibold" data-i18n="no_products">No products found</h6>
+                <p class="text-muted mb-3" data-i18n="no_products_hint">Try a different name or category.</p>
+                <a href="?" class="ui-btn ui-btn-outline ui-btn-sm"><span data-i18n="reset">Reset filters</span></a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 
+    <!-- ============ PAGINATION ============ -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-4" aria-label="Pagination">
+
+        <div class="text-muted small">
+            <span data-i18n="page">Page</span> {{ page_obj.number }}
+            <span data-i18n="of">of</span> {{ page_obj.paginator.num_pages }}
+        </div>
+
+        <div class="d-flex align-items-center gap-1">
+            {% if page_obj.has_previous %}
+            <a class="ui-btn ui-btn-outline ui-btn-sm" href="?{{ querystring }}page={{ page_obj.previous_page_number }}">
+                <i class="bi bi-chevron-left"></i><span class="d-none d-sm-inline" data-i18n="prev">Previous</span>
+            </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:'-1' and num <= page_obj.number|add:'1' %}
+                    {% if num == page_obj.number %}
+                    <span class="ui-btn ui-btn-sm" aria-current="page">{{ num }}</span>
+                    {% else %}
+                    <a class="ui-btn ui-btn-outline ui-btn-sm" href="?{{ querystring }}page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% elif num == page_obj.number|add:'-2' or num == page_obj.number|add:'2' %}
+                    <span class="px-1 text-muted">…</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a class="ui-btn ui-btn-outline ui-btn-sm" href="?{{ querystring }}page={{ page_obj.next_page_number }}">
+                <span class="d-none d-sm-inline" data-i18n="next">Next</span><i class="bi bi-chevron-right"></i>
+            </a>
+            {% endif %}
         </div>
     </nav>
-    {% endblock %}
+    {% endif %}
 
-    <main class="page-content">
-        <div class="container py-4">
-            <div class="row g-4">
-                {% block sidebar %}{% endblock %}
-                {% block main %}{% endblock %}
-            </div>
-        </div>
-    </main>
-
-    <footer class="shop-footer mt-4">
-        <div class="container py-4">
-            <div class="row g-4">
-                <div class="col-md-5">
-                    <a class="footer-brand" href="/">
-                        <span class="brand-mark"><i class="bi bi-bag-heart-fill"></i></span>Drinks Well & Fruit Shops
-                    </a>
-                    <p class="small mt-2 mb-0 footer-text">Fresh drinks and fruits, made simple.</p>
-                </div>
-
-                <div class="col-6 col-md-3">
-                    <div class="footer-title">Quick links</div>
-                    <ul class="list-unstyled small mb-0 d-grid gap-2">
-                        <li><a href="/" class="footer-link">Home</a></li>
-                        <li><button type="button" class="footer-link" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button></li>
-                        <li><button type="button" class="footer-link" data-bs-toggle="modal" data-bs-target="#aboutModal">About Developer</button></li>
-                    </ul>
-                </div>
-
-                <div class="col-6 col-md-4">
-                    <div class="footer-title">Get in touch</div>
-                    <ul class="list-unstyled small mb-0 d-grid gap-2">
-                        <li><i class="bi bi-envelope me-2"></i><a href="mailto:you@example.com" class="footer-link">maheshrajlamsal01.com</a></li>
-                        <li><i class="bi bi-telephone me-2"></i><a href="tel:+9779800000000" class="footer-link">+977 9765245421</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container py-3 small d-flex flex-wrap justify-content-between gap-2">
-                <span>© 2026 Mahesh Raj Lamsal. <span>All rights reserved.</span></span>
-                <span>Made in Nepal</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Contact modal (edit the details) -->
-    <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h6 class="modal-title fw-semibold">Contact</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="list-unstyled mb-0 d-grid gap-3">
-                        <li class="d-flex gap-3"><i class="bi bi-envelope"></i>
-                            <div><div class="fw-medium">Email</div>
-                            <a href="mailto:you@example.com" class="text-muted text-decoration-none">maheshrajlamsal01@gmail.com</a></div></li>
-                        <li class="d-flex gap-3"><i class="bi bi-telephone"></i>
-                            <div><div class="fw-medium">Phone</div>
-                            <a href="tel:+9779800000000" class="text-muted text-decoration-none">+977 9765245421</a></div></li>
-                        <li class="d-flex gap-3"><i class="bi bi-geo-alt"></i>
-                            <div><div class="fw-medium">Location</div>
-                            <span class="text-muted">Malpot Chowk Bharatpur, Nepal</span></div></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- About developer modal -->
-    <div class="modal fade" id="aboutModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h6 class="modal-title fw-semibold">About Developer</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <span class="brand-mark" style="width:48px;height:48px;border-radius:12px;font-size:1.2rem;"><i class="bi bi-person-fill"></i></span>
-                        <div>
-                            <div class="fw-semibold">Mahesh Raj Lamsal</div>
-                            <div class="text-muted small">Full-stack Developer</div>
-                        </div>
-                    </div>
-                    <p class="text-muted mb-3">I build web apps with Django and Bootstrap.</p>
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="ui-badge">Django</span>
-                        <span class="ui-badge">Python</span>
-                        <span class="ui-badge">Bootstrap</span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <a href="https://github.com/Mahesh-179" target="_blank" rel="noopener" class="ui-btn ui-btn-outline ui-btn-sm"><i class="bi bi-github"></i>GitHub</a>
-                    <button type="button" class="ui-btn ui-btn-sm" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- English / Nepali translation -->
-    <script>
-    (function () {
-        // NOTE: every line except the last must end with a comma.
-        var NE = {
-            // Brand / navbar
-            "Drinks Well & Fruit Shops": "ड्रिंक्स वेल एन्ड फ्रुट सप",
-            "Home": "गृहपृष्ठ",
-            "Contact": "सम्पर्क",
-            "About Developer": "डेभलपरको बारेमा",
-            "Login": "लगइन",
-            "Register": "दर्ता गर्नुहोस्",
-            "Logout": "लगआउट",
-            "My Details": "मेरो विवरण",
-            "Your Orders": "तपाईंका अर्डरहरू",
-            "Admin Panel": "एडमिन प्यानल",
-
-            // Modals
-            "Email": "इमेल",
-            "Phone": "फोन",
-            "Location": "ठेगाना",
-            "Close": "बन्द गर्नुहोस्",
-            "Full-stack Developer": "फुल-स्ट्याक डेभलपर",
-            "I build web apps with Django and Bootstrap.": "म Django र Bootstrap प्रयोग गरेर वेब एप बनाउँछु।",
-            "Your shop address, Nepal": "तपाईंको पसलको ठेगाना, नेपाल",
-
-            // Products page
-            "Products": "उत्पादनहरू",
-            "Product": "उत्पादन",
-            "Filter Products": "उत्पादन फिल्टर",
-            "Product Name": "उत्पादनको नाम",
-            "Search product": "उत्पादन खोज्नुहोस्",
-            "Search products": "उत्पादन खोज्नुहोस्",
-            "Category": "वर्ग",
-            "Categories": "वर्गहरू",
-            "All Categories": "सबै वर्ग",
-            "Beverage": "पेय पदार्थ",
-            "Sports": "खेलकुद",
-            "Education": "शिक्षा",
-            "Filter": "फिल्टर",
-            "Apply Filter": "फिल्टर लागू गर्नुहोस्",
-            "Apply Filters": "फिल्टर लागू गर्नुहोस्",
-            "Clear": "खाली गर्नुहोस्",
-            "Reset filters": "फिल्टर रिसेट गर्नुहोस्",
-            "View Details": "विवरण हेर्नुहोस्",
-            "Add To Cart": "कार्टमा थप्नुहोस्",
-            "No products available.": "कुनै उत्पादन उपलब्ध छैन।",
-            "No products found": "कुनै उत्पादन फेला परेन",
-            "Try a different name or category.": "अर्को नाम वा वर्ग प्रयास गर्नुहोस्।",
-
-            // Pagination
-            "Previous": "अघिल्लो",
-            "Next": "अर्को",
-            "Page": "पृष्ठ",
-            "of": "को",
-            "Showing": "देखाइँदै",
-
-            // Orders / checkout
-            "My Order History": "मेरो अर्डर इतिहास",
-            "Order ID": "अर्डर आईडी",
-            "Quantity": "परिमाण",
-            "Price Per Unit": "प्रति इकाई मूल्य",
-            "Date": "मिति",
-            "Status": "स्थिति",
-            "Details": "विवरण",
-            "View": "हेर्नुहोस्",
-            "Paid": "भुक्तानी भयो",
-            "Pending": "विचाराधीन",
-            "Total Amount": "कुल रकम",
-            "No orders found.": "कुनै अर्डर फेला परेन।",
-            "Checkout": "चेकआउट",
-            "Place Order": "अर्डर गर्नुहोस्",
-            "Back to Cart": "कार्टमा फर्कनुहोस्",
-            "Already have an account?": "पहिल्यै खाता छ?",
-            "New here?": "नयाँ हुनुहुन्छ?",
-
-            // Footer
-            "All rights reserved.": "सर्वाधिकार सुरक्षित।",
-            "Quick links": "छिटो लिङ्कहरू",
-            "Get in touch": "सम्पर्कमा रहनुहोस्",
-            "Fresh drinks and fruits, made simple.": "ताजा पेय र फलफूल, सजिलै।",
-            "Made in Nepal": "नेपालमा निर्मित"
-        };
-
-        // case-insensitive lookup ("Product name" also matches "Product Name")
-        var LOOKUP = {};
-        Object.keys(NE).forEach(function (k) { LOOKUP[k.toLowerCase()] = NE[k]; });
-        function tr(text, lang) {
-            if (lang !== "ne") return text;
-            return LOOKUP[text.replace(/\s+/g, " ").trim().toLowerCase()] || text;
-        }
-
-        var KEY = "shop_lang";
-        var btn = document.getElementById("langBtn");
-
-        function textNodes() {
-            var out = [];
-            var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
-                acceptNode: function (n) {
-                    var p = n.parentNode;
-                    if (!p || p.nodeName === "SCRIPT" || p.nodeName === "STYLE") return NodeFilter.FILTER_REJECT;
-                    return n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-                }
-            });
-            while (walker.nextNode()) out.push(walker.currentNode);
-            return out;
-        }
-
-        function apply(lang) {
-            textNodes().forEach(function (node) {
-                if (node._orig === undefined) node._orig = node.nodeValue.trim();
-                var lead = node.nodeValue.match(/^\s*/)[0];
-                var trail = node.nodeValue.match(/\s*$/)[0];
-                node.nodeValue = lead + tr(node._orig, lang) + trail;
-            });
-
-            document.querySelectorAll("[placeholder]").forEach(function (el) {
-                if (el.dataset.origPh === undefined) el.dataset.origPh = el.getAttribute("placeholder");
-                el.setAttribute("placeholder", tr(el.dataset.origPh, lang));
-            });
-
-            document.documentElement.lang = lang;
-            document.body.classList.toggle("lang-ne", lang === "ne");
-            if (btn) btn.textContent = lang === "ne" ? "English" : "नेपाली";
-        }
-
-        function getLang() {
-            try { return localStorage.getItem(KEY) || "en"; } catch (e) { return "en"; }
-        }
-        function setLang(lang) {
-            try { localStorage.setItem(KEY, lang); } catch (e) {}
-        }
-
-        if (btn) {
-            btn.addEventListener("click", function () {
-                var next = getLang() === "en" ? "ne" : "en";
-                setLang(next);
-                apply(next);
-            });
-        }
-
-        apply(getLang());
-    })();
-    </script>
-
-    <!-- Dark / light theme toggle -->
-    <script>
-    (function () {
-        var KEY = "shop_theme", root = document.documentElement, btn = document.getElementById("themeBtn");
-
-        function setTheme(t, save) {
-            root.setAttribute("data-bs-theme", t);
-            if (save) { try { localStorage.setItem(KEY, t); } catch (e) {} }
-            if (btn) btn.setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode");
-        }
-
-        setTheme(root.getAttribute("data-bs-theme") || "light", false);
-
-        if (btn) btn.addEventListener("click", function () {
-            setTheme(root.getAttribute("data-bs-theme") === "dark" ? "light" : "dark", true);
-        });
-
-        // Follow the system theme until the user picks one manually
-        matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function (e) {
-            var saved; try { saved = localStorage.getItem(KEY); } catch (x) {}
-            if (!saved) setTheme(e.matches ? "dark" : "light", false);
-        });
-    })();
-    </script>
-
-    <!-- Show / hide password -->
-    <script>
-    (function () {
-        document.querySelectorAll('input[type="password"]').forEach(function (input) {
-            var wrap = document.createElement("div");
-            wrap.className = "pw-wrap";
-            input.parentNode.insertBefore(wrap, input);
-            wrap.appendChild(input);
-
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "pw-toggle";
-            btn.setAttribute("aria-label", "Show password");
-            btn.innerHTML = '<i class="bi bi-eye"></i>';
-            wrap.appendChild(btn);
-
-            btn.addEventListener("click", function () {
-                var show = input.type === "password";
-                input.type = show ? "text" : "password";
-                btn.innerHTML = show ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
-                btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
-                input.focus();
-            });
-        });
-    })();
-    </script>
-
-    {% block js %}{% endblock %}
-</body>
-
-</html>
+</div>
+{% endblock %}
