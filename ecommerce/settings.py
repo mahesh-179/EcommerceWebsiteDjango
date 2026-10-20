@@ -159,6 +159,7 @@ CLOUDINARY_STORAGE ={
     "API_KEY":os.getenv("API_KEYS"),
     "API_SECRET":os.getenv("API_SECRET"),
 }
+
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
