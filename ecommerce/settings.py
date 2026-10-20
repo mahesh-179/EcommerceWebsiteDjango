@@ -154,16 +154,13 @@ LOGGING = {
         },
     },
 }
-import cloudinary
 # Cloudinary Configuration
-cloudinary.config(
-    cloud_name=os.getenv("CLOUD_NAME"),
-    api_key=os.getenv("API_KEYS"),
-    api_secret=os.getenv("API_SECRET"),
-    secure=True,
-)
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.getenv("CLOUD_NAME"),
+    "API_KEY": os.getenv("API_KEYS"),
+    "API_SECRET": os.getenv("API_SECRET"),
+}
 
-# Media and Static Storage
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
