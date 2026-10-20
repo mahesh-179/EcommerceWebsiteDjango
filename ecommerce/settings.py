@@ -31,6 +31,8 @@ INSTALLED_APPS = [
     'secondapp',
     "crispy_forms",
     "crispy_bootstrap5",
+    "cloudinary",
+    "cloudinary_storage",
 ]
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -150,5 +152,18 @@ LOGGING = {
             "level": "ERROR",
             "propagate": False,
         },
+    },
+}
+CLOUDINARY_STORAGE ={
+    "CLOUD_NAME": os.getenv("CLOUD_NAME"),
+    "API_KEY":os.getenv("API_KEYS"),
+    "API_SECRET":os.getenv("API_SECRET"),
+}
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
