@@ -1,0 +1,45 @@
+<style>
+    .detail-img {
+        position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden;
+        background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .detail-img img {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        object-fit: contain; display: block;
+    }
+    .detail-img .no-img { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+</style>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="detail-img">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+            <div class="no-img"><i class="bi bi-image text-secondary fs-1"></i></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-7 d-flex flex-column">
+        {% if product.category %}
+        <div class="mb-2"><span class="ui-badge"><i class="bi bi-tag"></i>{{ product.category }}</span></div>
+        {% endif %}
+
+        <h2 class="h4 fw-bold mb-2" style="letter-spacing:-.02em;">{{ product.name }}</h2>
+        <div class="fs-4 fw-bold mb-3">NPR {{ product.price }}</div>
+
+        {% if product.description %}
+        <p class="text-muted">{{ product.description|linebreaksbr }}</p>
+        {% endif %}
+
+        <div class="mt-auto pt-3">
+            <form action="{% url 'add' product.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="ui-btn w-100">
+                    <i class="bi bi-cart-plus"></i><span>Add To Cart</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -30,4 +30,5 @@ urlpatterns = [
         name="download-all-receipts",
     ),
     path("my-details/", my_details, name="my_details"),
+    path("product/<int:pk>/", views.product_detail, name="product_detail"),
 ]

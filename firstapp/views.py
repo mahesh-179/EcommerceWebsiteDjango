@@ -156,7 +156,13 @@ def download_all_receipts(request):
         )
 
     return response
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return render(request, "firstapp/product_detail_partial.html", {"product": product})
+
+    return render(request, "firstapp/product_detail.html", {"product": product})
 
 
 # @login_required
