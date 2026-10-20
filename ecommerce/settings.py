@@ -155,17 +155,20 @@ LOGGING = {
     },
 }
 import cloudinary
-cloudinary.config ={
-    "CLOUD_NAME": os.getenv("CLOUD_NAME"),
-    "API_KEY":os.getenv("API_KEYS"),
-    "API_SECRET":os.getenv("API_SECRET"),
-}
+# Cloudinary Configuration
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("API_KEYS"),
+    api_secret=os.getenv("API_SECRET"),
+    secure=True,
+)
 
+# Media and Static Storage
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
