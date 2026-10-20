@@ -220,6 +220,52 @@
         .pw-toggle:focus-visible { outline: 2px solid var(--ring); }
     </style>
 
+    <style>
+        /* ---------- Responsive fixes ---------- */
+        body { min-height: 100vh; min-height: 100dvh; }
+        img { max-width: 100%; }
+        .brand-mark { flex-shrink: 0; }
+
+        /* Mobile menu tools (theme + language live here on phones) */
+        .mobile-menu-tools {
+            display: grid; grid-template-columns: 1fr 1fr; gap: .5rem;
+            margin-top: .5rem; padding-top: .75rem; border-top: 1px solid var(--border);
+        }
+        .mobile-menu-tools .ui-btn { min-height: 42px; }
+
+        .footer-link { word-break: break-word; text-align: left; }
+        .account-menu { max-width: calc(100vw - 1.5rem); }
+
+        /* ---------- Phones and small tablets ---------- */
+        @media (max-width: 767.98px) {
+            .shop-navbar { padding-block: .5rem; }
+            .shop-navbar .container > .d-flex { gap: .5rem !important; }
+            .nav-icon-btn { width: 40px; height: 40px; font-size: 1.05rem; }
+            .shop-navbar .navbar-toggler {
+                width: 40px; height: 40px; padding: 0; margin-left: 0 !important;
+                display: inline-flex; align-items: center; justify-content: center;
+                border-radius: calc(var(--radius) - 2px);
+            }
+            .shop-navbar .navbar-collapse { max-height: calc(100dvh - 72px); overflow-y: auto; padding-bottom: .5rem; }
+            .shop-navbar .navbar-nav { gap: .25rem; }
+            .shop-navbar .nav-link { width: 100%; text-align: left; padding: .7rem .85rem !important; font-size: .95rem; }
+        }
+        @media (max-width: 575.98px) {
+            main.page-content > .container { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+            .ui-card-body { padding: 1rem; }
+            .ui-input { font-size: 16px; }              /* stops iOS zooming into inputs */
+            .footer-bottom .container { justify-content: center !important; text-align: center; }
+        }
+        @media (max-width: 359.98px) {
+            .shop-navbar .brand-mark { display: none; }
+            .shop-navbar .navbar-brand { font-size: .8rem; }
+        }
+        @media (pointer: coarse) {
+            .ui-btn { min-height: 40px; }
+            .ui-btn-sm { min-height: 38px; }
+        }
+    </style>
+
     {% block css %}{% endblock %}
 </head>
 
@@ -240,12 +286,12 @@
             <!-- Always visible (also on mobile) -->
             <div class="d-flex align-items-center gap-2 ms-auto order-md-last">
 
-                <button type="button" class="nav-icon-btn theme-toggle" id="themeBtn" aria-label="Toggle dark mode">
+                <button type="button" class="nav-icon-btn theme-toggle js-theme-toggle d-none d-md-inline-flex" id="themeBtn" aria-label="Toggle dark mode">
                     <i class="bi bi-moon-stars icon-moon"></i>
                     <i class="bi bi-sun icon-sun"></i>
                 </button>
 
-                <button type="button" class="lang-btn" id="langBtn" aria-label="Change language">नेपाली</button>
+                <button type="button" class="lang-btn js-lang-toggle d-none d-md-inline-block" id="langBtn" aria-label="Change language">नेपाली</button>
 
                 {% if user.is_authenticated and user.is_staff %}
                 <a class="nav-icon-btn d-none d-md-inline-flex" href="{% url 'admin:index' %}" aria-label="Admin panel" title="Admin panel">
@@ -333,6 +379,14 @@
                         <button type="button" class="nav-link" data-bs-toggle="modal" data-bs-target="#aboutModal">About Developer</button>
                     </li>
                 </ul>
+
+                <!-- Phones only: theme + language -->
+                <div class="mobile-menu-tools d-md-none">
+                    <button type="button" class="ui-btn ui-btn-outline theme-toggle js-theme-toggle" aria-label="Toggle dark mode">
+                        <i class="bi bi-moon-stars icon-moon"></i><i class="bi bi-sun icon-sun"></i><span>Theme</span>
+                    </button>
+                    <button type="button" class="ui-btn ui-btn-outline js-lang-toggle" aria-label="Change language">नेपाली</button>
+                </div>
             </div>
 
         </div>
@@ -458,6 +512,7 @@
             "My Details": "मेरो विवरण",
             "Your Orders": "तपाईंका अर्डरहरू",
             "Admin Panel": "एडमिन प्यानल",
+            "Theme": "थिम",
 
             // Modals
             "Email": "इमेल",
@@ -537,7 +592,7 @@
         }
 
         var KEY = "shop_lang";
-        var btn = document.getElementById("langBtn");
+        var langBtns = document.querySelectorAll(".js-lang-toggle");
 
         function textNodes() {
             var out = [];
@@ -567,7 +622,7 @@
 
             document.documentElement.lang = lang;
             document.body.classList.toggle("lang-ne", lang === "ne");
-            if (btn) btn.textContent = lang === "ne" ? "English" : "नेपाली";
+            langBtns.forEach(function (b) { b.textContent = lang === "ne" ? "English" : "नेपाली"; });
         }
 
         function getLang() {
@@ -577,13 +632,13 @@
             try { localStorage.setItem(KEY, lang); } catch (e) {}
         }
 
-        if (btn) {
-            btn.addEventListener("click", function () {
+        langBtns.forEach(function (b) {
+            b.addEventListener("click", function () {
                 var next = getLang() === "en" ? "ne" : "en";
                 setLang(next);
                 apply(next);
             });
-        }
+        });
 
         apply(getLang());
     })();
@@ -592,18 +647,20 @@
     <!-- Dark / light theme toggle -->
     <script>
     (function () {
-        var KEY = "shop_theme", root = document.documentElement, btn = document.getElementById("themeBtn");
+        var KEY = "shop_theme", root = document.documentElement, themeBtns = document.querySelectorAll(".js-theme-toggle");
 
         function setTheme(t, save) {
             root.setAttribute("data-bs-theme", t);
             if (save) { try { localStorage.setItem(KEY, t); } catch (e) {} }
-            if (btn) btn.setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode");
+            themeBtns.forEach(function (b) { b.setAttribute("aria-label", t === "dark" ? "Switch to light mode" : "Switch to dark mode"); });
         }
 
         setTheme(root.getAttribute("data-bs-theme") || "light", false);
 
-        if (btn) btn.addEventListener("click", function () {
-            setTheme(root.getAttribute("data-bs-theme") === "dark" ? "light" : "dark", true);
+        themeBtns.forEach(function (b) {
+            b.addEventListener("click", function () {
+                setTheme(root.getAttribute("data-bs-theme") === "dark" ? "light" : "dark", true);
+            });
         });
 
         // Follow the system theme until the user picks one manually
